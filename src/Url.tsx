@@ -1,4 +1,11 @@
 export class Url {
+    public static current() {
+        if (typeof window === 'undefined') {
+            throw new TypeError('window not defined in this context');
+        }
+        return new Url(window.location.href);
+    }
+
     private _protocol: string = '';
     private _host: string = '';
     private _hostname: string = '';
@@ -6,13 +13,6 @@ export class Url {
     private _hash: string = '';
     private _search: string = '';
     private _pathname: string = '/';
-
-    public static current() {
-        if (typeof window === 'undefined') {
-            throw new TypeError('window not defined in this context');
-        }
-        return new Url(window.location.href);
-    }
 
     constructor(href?: string | Url | URL) {
         if (typeof href !== 'undefined') {
@@ -179,7 +179,7 @@ export class Url {
      * @returns {boolean}
      */
     public isLocal() {
-        return window.location.host == this._host;
+        return '' + window.location.host === '' + this._host;
     }
 
     /**
@@ -192,7 +192,7 @@ export class Url {
         const pageUrl = Url.current();
 
         return (
-            pageUrl.host == this.host &&
+            ('' + pageUrl.host) === ('' + this.host) &&
             pageUrl._protocol === this._protocol &&
             pageUrl.pathname === this.pathname &&
             (ignoreSearch || pageUrl.search === this.search)
@@ -215,7 +215,7 @@ export class Url {
      * @returns {boolean}
      */
     public isEqualTo(url: string | URL | Url) {
-        return ('' + url) == ('' + this);
+        return ('' + url) === ('' + this);
     }
 
     /**
