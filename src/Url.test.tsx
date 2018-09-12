@@ -1,7 +1,7 @@
 import {Url} from './Url';
 import re_weburl from './UrlValidationRegex';
 
-const isValidUrl = function (url: Url | string) {
+function isValidUrl(url: Url | string) {
     try {
         new URL('' + url);
 
@@ -9,118 +9,128 @@ const isValidUrl = function (url: Url | string) {
     } catch (e) {
         return re_weburl.test('' + url);
     }
-};
+}
+
+function getLocation(): Partial<Location> {
+    if (typeof window !== 'undefined' && window.location) {
+        return window.location;
+    }
+    throw 'Use the Jest option `--env=jsdom`';
+}
+
+function generateTestSets() {
+    const testLocation = getLocation();
+
+    return {
+        '/': {
+            'pathname': '/',
+            'hash': '',
+            'search': '',
+            'hostname': testLocation.hostname,
+            'protocol': testLocation.protocol,
+            'port': testLocation.port,
+        },
+        '/subPath': {
+            'pathname': '/subPath',
+            'hash': '',
+            'search': '',
+            'hostname': testLocation.hostname,
+            'protocol': testLocation.protocol,
+            'port': testLocation.port,
+        },
+        '/subPath/next-level': {
+            'pathname': '/subPath/next-level',
+            'hash': '',
+            'search': '',
+            'hostname': testLocation.hostname,
+            'protocol': testLocation.protocol,
+            'port': testLocation.port,
+        },
+        '/subPath/next-level?search=1&param2=xyz#hash': {
+            'pathname': '/subPath/next-level',
+            'hash': '#hash',
+            'search': '?search=1&param2=xyz',
+            'hostname': testLocation.hostname,
+            'protocol': testLocation.protocol,
+            'port': testLocation.port,
+        },
+        '/subPath/?search=1&param2=xyz#hash': {
+            'pathname': '/subPath/',
+            'hash': '#hash',
+            'search': '?search=1&param2=xyz',
+            'hostname': testLocation.hostname,
+            'protocol': testLocation.protocol,
+            'port': testLocation.port,
+        },
+        '/subPath/next-level?search=1&param2=xyz': {
+            'pathname': '/subPath/next-level',
+            'hash': '',
+            'search': '?search=1&param2=xyz',
+            'hostname': testLocation.hostname,
+            'protocol': testLocation.protocol,
+            'port': testLocation.port,
+        },
+        '/subPath/?search=1&param2=xyz': {
+            'pathname': '/subPath/',
+            'hash': '',
+            'search': '?search=1&param2=xyz',
+            'hostname': testLocation.hostname,
+            'protocol': testLocation.protocol,
+            'port': testLocation.port,
+        },
+        '/?search=1&param2=xyz#hash': {
+            'pathname': '/',
+            'hash': '#hash',
+            'search': '?search=1&param2=xyz',
+            'hostname': testLocation.hostname,
+            'protocol': testLocation.protocol,
+            'port': testLocation.port,
+        },
+        '?search=1&param2=xyz#hash': {
+            'pathname': testLocation.pathname,
+            'hash': '#hash',
+            'search': '?search=1&param2=xyz',
+            'hostname': testLocation.hostname,
+            'protocol': testLocation.protocol,
+            'port': testLocation.port,
+        },
+        'www.cundd.net?search=1&param2=xyz#hash': {
+            'pathname': '/www.cundd.net',
+            'hash': '#hash',
+            'search': '?search=1&param2=xyz',
+            'hostname': testLocation.hostname,
+            'protocol': testLocation.protocol,
+            'port': testLocation.port,
+        },
+        'http://www.cundd.net?search=1&param2=xyz#hash': {
+            'pathname': '/',
+            'hash': '#hash',
+            'search': '?search=1&param2=xyz',
+            'hostname': 'www.cundd.net',
+            'protocol': testLocation.protocol,
+            'port': testLocation.port,
+        },
+        'https://www.cundd.net?search=1&param2=xyz#hash': {
+            'pathname': '/',
+            'hash': '#hash',
+            'search': '?search=1&param2=xyz',
+            'hostname': 'www.cundd.net',
+            'protocol': 'https:',
+            'port': testLocation.port,
+        },
+        '//www.cundd.net?search=1&param2=xyz#hash': {
+            'pathname': '/',
+            'hash': '#hash',
+            'search': '?search=1&param2=xyz',
+            'hostname': 'www.cundd.net',
+            'protocol': testLocation.protocol,
+            'port': testLocation.port,
+        }
+    };
+}
 
 describe('Url', () => {
     describe('new', () => {
-        const windowLocation = window.location;
-        const testSets = {
-            '/': {
-                'pathname': '/',
-                'hash': '',
-                'search': '',
-                'hostname': windowLocation.hostname,
-                'protocol': windowLocation.protocol,
-                'port': windowLocation.port,
-            },
-            '/subPath': {
-                'pathname': '/subPath',
-                'hash': '',
-                'search': '',
-                'hostname': windowLocation.hostname,
-                'protocol': windowLocation.protocol,
-                'port': windowLocation.port,
-            },
-            '/subPath/next-level': {
-                'pathname': '/subPath/next-level',
-                'hash': '',
-                'search': '',
-                'hostname': windowLocation.hostname,
-                'protocol': windowLocation.protocol,
-                'port': windowLocation.port,
-            },
-            '/subPath/next-level?search=1&param2=xyz#hash': {
-                'pathname': '/subPath/next-level',
-                'hash': '#hash',
-                'search': '?search=1&param2=xyz',
-                'hostname': windowLocation.hostname,
-                'protocol': windowLocation.protocol,
-                'port': windowLocation.port,
-            },
-            '/subPath/?search=1&param2=xyz#hash': {
-                'pathname': '/subPath/',
-                'hash': '#hash',
-                'search': '?search=1&param2=xyz',
-                'hostname': windowLocation.hostname,
-                'protocol': windowLocation.protocol,
-                'port': windowLocation.port,
-            },
-            '/subPath/next-level?search=1&param2=xyz': {
-                'pathname': '/subPath/next-level',
-                'hash': '',
-                'search': '?search=1&param2=xyz',
-                'hostname': windowLocation.hostname,
-                'protocol': windowLocation.protocol,
-                'port': windowLocation.port,
-            },
-            '/subPath/?search=1&param2=xyz': {
-                'pathname': '/subPath/',
-                'hash': '',
-                'search': '?search=1&param2=xyz',
-                'hostname': windowLocation.hostname,
-                'protocol': windowLocation.protocol,
-                'port': windowLocation.port,
-            },
-            '/?search=1&param2=xyz#hash': {
-                'pathname': '/',
-                'hash': '#hash',
-                'search': '?search=1&param2=xyz',
-                'hostname': windowLocation.hostname,
-                'protocol': windowLocation.protocol,
-                'port': windowLocation.port,
-            },
-            '?search=1&param2=xyz#hash': {
-                'pathname': windowLocation.pathname,
-                'hash': '#hash',
-                'search': '?search=1&param2=xyz',
-                'hostname': windowLocation.hostname,
-                'protocol': windowLocation.protocol,
-                'port': windowLocation.port,
-            },
-            'www.cundd.net?search=1&param2=xyz#hash': {
-                'pathname': '/www.cundd.net',
-                'hash': '#hash',
-                'search': '?search=1&param2=xyz',
-                'hostname': windowLocation.hostname,
-                'protocol': windowLocation.protocol,
-                'port': windowLocation.port,
-            },
-            'http://www.cundd.net?search=1&param2=xyz#hash': {
-                'pathname': '/',
-                'hash': '#hash',
-                'search': '?search=1&param2=xyz',
-                'hostname': 'www.cundd.net',
-                'protocol': windowLocation.protocol,
-                'port': windowLocation.port,
-            },
-            'https://www.cundd.net?search=1&param2=xyz#hash': {
-                'pathname': '/',
-                'hash': '#hash',
-                'search': '?search=1&param2=xyz',
-                'hostname': 'www.cundd.net',
-                'protocol': 'https:',
-                'port': windowLocation.port,
-            },
-            '//www.cundd.net?search=1&param2=xyz#hash': {
-                'pathname': '/',
-                'hash': '#hash',
-                'search': '?search=1&param2=xyz',
-                'hostname': 'www.cundd.net',
-                'protocol': windowLocation.protocol,
-                'port': windowLocation.port,
-            }
-        };
-
         const testUrl = function (inputUrl: string | Url, testData: Partial<URL>) {
             const url = new Url(inputUrl);
             // const failureMessage = 'Failed test for URL "' + inputUrl + '"';
@@ -135,12 +145,16 @@ describe('Url', () => {
         };
 
         it('should build full URL from string', () => {
+            const testSets = generateTestSets();
+
             Object.keys(testSets).forEach(function (inputUrl) {
                 testUrl(inputUrl, testSets[inputUrl]);
             });
         });
 
         it('should build full URL from URL', () => {
+            const testSets = generateTestSets();
+
             Object.keys(testSets).forEach(function (inputUrl) {
                 testUrl(new Url(inputUrl), testSets[inputUrl]);
             });
@@ -149,15 +163,15 @@ describe('Url', () => {
 
     describe('current', () => {
         it('should create from the current URL', () => {
+            const testLocation = getLocation();
             const url = Url.current();
 
-            console.debug(url, '' + url);
             expect(isValidUrl(url)).toBeTruthy();
             expect(url.pathname).toEqual('/');
-            expect(url.protocol).toEqual(window.location.protocol);
-            expect(url.hash).toEqual(window.location.hash);
-            expect(url.search).toEqual(window.location.search);
-            expect(url.hostname).toEqual(window.location.hostname);
+            expect(url.protocol).toEqual(testLocation.protocol);
+            expect(url.hash).toEqual(testLocation.hash);
+            expect(url.search).toEqual(testLocation.search);
+            expect(url.hostname).toEqual(testLocation.hostname);
         });
     });
 });
